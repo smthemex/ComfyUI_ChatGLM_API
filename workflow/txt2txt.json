@@ -1,0 +1,97 @@
+{
+  "last_node_id": 7,
+  "last_link_id": 6,
+  "nodes": [
+    {
+      "id": 2,
+      "type": "ShowText|pysssss",
+      "pos": [
+        1011,
+        352
+      ],
+      "size": {
+        "0": 455.009765625,
+        "1": 217.37974548339844
+      },
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "link": 6,
+          "widget": {
+            "name": "text"
+          },
+          "label": "文本",
+          "slot_index": 0
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null,
+          "shape": 6,
+          "label": "字符串"
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ShowText|pysssss"
+      },
+      "widgets_values": [
+        "",
+        "Cute, fluffy, small cat with big eyes and a playful personality."
+      ]
+    },
+    {
+      "id": 7,
+      "type": "ZhipuaiApi_Txt",
+      "pos": [
+        459.0848671875001,
+        268.61871838378914
+      ],
+      "size": {
+        "0": 400,
+        "1": 200
+      },
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": [
+            6
+          ],
+          "shape": 3,
+          "label": "text",
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ZhipuaiApi_Txt"
+      },
+      "widgets_values": [
+        "30 words describe a girl walking on the Moon.",
+        "glm-3-turbo"
+      ]
+    }
+  ],
+  "links": [
+    [
+      6,
+      7,
+      0,
+      2,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}
