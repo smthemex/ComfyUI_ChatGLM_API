@@ -1,10 +1,20 @@
 # ComfyUI_ChatGLM_API
 
-You can call Chatglm's API in comfyUI to translate and describe pictures, and the API similar to OPENAI is suitable for users in Chinese Mainland.  
------------
+你可以在ComfyUI里调用Chatglm的api，用来翻译、描述图片等等，类似OpenAI 的API，适合中国大陆用户。
+-----------  
 
-你可以在ComfyUI里调用Chatglm的api，用来翻译、描述图片等等，类似OPenAI 的API，适合中国大陆用户。
------------    
+You can call Chatglm's API in comfyUI to translate and describe pictures, and the API similar to OpenAI is suitable for users in Chinese Mainland.  
+-----------
+注意:如果你只想调用Api查询资料或者娱乐,可选Original_language,作为你的母语输出.    
+----
+
+限于中国的法律法规,所有NSFW内容可能会被过滤掉,如果违规上传NSFW的内容,你的zhipuai账户可能因此被封禁.
+-----
+
+Notice:If you only want to call Api to search for information or entertainment, you can choose Original_language as your native language output    
+----
+Due to Chinese laws and regulations, all NSFW content may be filtered out. If you upload NSFW content in violation of regulations, your Zhipai account may be banned as a result
+------
 
 
 **A  使用方法：**  
