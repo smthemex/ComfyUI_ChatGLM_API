@@ -57,6 +57,7 @@ class ZhipuaiApi_Txt:
             "required": {
                 "prompt": ("STRING", {"multiline": True, "default": "30 words describe a girl walking on the Moon."}),
                 "model_name": (["glm-4", "glm-3-turbo"],),
+                "output_language": (["English", "Original_language"],),
             },
         }
 
@@ -66,13 +67,16 @@ class ZhipuaiApi_Txt:
     CATEGORY = "ChatGlm_Api"  
 
 
-    def zhipuai_txt_api(self, prompt, model_name):
+    def zhipuai_txt_api(self, prompt, model_name, output_language):
         if not self.api_key:
             raise ValueError("API key is required")
         if prompt == None:
             raise ValueError("need prompt")
         else:
-            prompt_txt = 'in English'
+            if output_language == "English":
+                prompt_txt = 'Reply in English'
+            else:
+                prompt_txt = '用提问的语言回复我'
             prompt = ''.join([prompt, prompt_txt])
             url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
             exp_seconds = int(9)
@@ -106,6 +110,7 @@ class ZhipuaiApi_Img:
             "required": {
                 "prompt": ("STRING", {"default": "Describe this image", "multiline": True}),
                 "image": ("IMAGE",),
+                "output_language": (["English", "Original_language"],),
             }
         }
 
@@ -120,7 +125,7 @@ class ZhipuaiApi_Img:
         image = Image.fromarray(image_np, mode='RGB')
         return image
 
-    def zhipuai_img2txt_api(self, prompt, image):
+    def zhipuai_img2txt_api(self, prompt, image, output_language):
         if not self.api_key:
             raise ValueError("API key is required")
         if prompt == None:
@@ -128,7 +133,10 @@ class ZhipuaiApi_Img:
         if image == None:
             raise ValueError("Needs img")
         else:
-            prompt_img = 'in English'
+            if output_language == "English":
+                prompt_img = 'Reply in English'
+            else:
+                prompt_img = '用提问的语言回复我'
             prompt = ''.join([prompt, prompt_img])
 
             url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
