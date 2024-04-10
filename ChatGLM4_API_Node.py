@@ -171,7 +171,7 @@ class ZhipuaiApi_Img:
                 'Content-Type': 'application/json'
             }
 
-            data_img = {"model": "glm-4v", 'max_tokens': f'{max_tokens}','temperature': f'{temperature}'"messages": [{"role": "user","content": [{"type": "text", "text": f"{prompt}"},{"type": "image_url","image_url": {"url": f"{img_base64}"}}]}]}
+            data_img = {"model": "glm-4v", 'max_tokens': f'{max_tokens}','temperature': f'{temperature}',"messages": [{"role": "user","content": [{"type": "text", "text": f"{prompt}"},{"type": "image_url","image_url": {"url": f"{img_base64}"}}]}]}
             data_img = json.dumps(data_img)
 
             response = requests.post(url=url, headers=header_img, data=data_img)
