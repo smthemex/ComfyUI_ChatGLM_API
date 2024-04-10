@@ -57,6 +57,8 @@ class ZhipuaiApi_Txt:
             "required": {
                 "prompt": ("STRING", {"multiline": True, "default": "30 words describe a girl walking on the Moon."}),
                 "model_name": (["glm-4", "glm-3-turbo"],),
+                "max_tokens": ("INT", {"default": 1024, "min": 128, "max": 8192, "step": 128, "display": "slider"}),
+                "temperature": ("FLOAT", {"default": 0.95, "min": 0.01, "max": 0.99, "step": 0.01, "round": False, "display": "slider"}),
                 "output_language": (["English", "Original_language"],),
             },
         }
@@ -67,7 +69,7 @@ class ZhipuaiApi_Txt:
     CATEGORY = "ChatGlm_Api"  
 
 
-    def zhipuai_txt_api(self, prompt, model_name, output_language):
+    def zhipuai_txt_api(self, prompt, model_name, max_tokens, temperature, output_language):
         if not self.api_key:
             raise ValueError("API key is required")
         if prompt == None:
@@ -86,7 +88,7 @@ class ZhipuaiApi_Txt:
                 'Authorization': f'Bearer {token}',
                 'Content-Type': 'application/json'
             }
-            data_txt = {"model": f"{model_name}", "messages": [{"role": "user", "content": f"{prompt}"}]}
+            data_txt = {"model": f"{model_name}",'max_tokens': f'{max_tokens}','temperature': f'{temperature}', "messages": [{"role": "user", "content": f"{prompt}"}]}
             data_txt = json.dumps(data_txt)
             response = requests.post(url=url, headers=header_txt, data=data_txt)
             txt_content = response.json()
@@ -110,6 +112,8 @@ class ZhipuaiApi_Img:
             "required": {
                 "prompt": ("STRING", {"default": "Describe this image", "multiline": True}),
                 "image": ("IMAGE",),
+                "max_tokens": ("INT", {"default": 1024, "min": 128, "max": 8192, "step": 128, "display": "slider"}),
+                "temperature": ("FLOAT", {"default": 0.8, "min": 0.01, "max": 0.99, "step": 0.01, "round": False, "display": "slider"}),
                 "output_language": (["English", "Original_language"],),
             }
         }
@@ -125,7 +129,7 @@ class ZhipuaiApi_Img:
         image = Image.fromarray(image_np, mode='RGB')
         return image
 
-    def zhipuai_img2txt_api(self, prompt, image, output_language):
+    def zhipuai_img2txt_api(self, prompt, image, max_tokens, temperature, output_language):
         if not self.api_key:
             raise ValueError("API key is required")
         if prompt == None:
@@ -167,7 +171,7 @@ class ZhipuaiApi_Img:
                 'Content-Type': 'application/json'
             }
 
-            data_img = {"model": "glm-4v", "messages": [{"role": "user","content": [{"type": "text", "text": f"{prompt}"},{"type": "image_url","image_url": {"url": f"{img_base64}"}}]}]}
+            data_img = {"model": "glm-4v", 'max_tokens': f'{max_tokens}','temperature': f'{temperature}'"messages": [{"role": "user","content": [{"type": "text", "text": f"{prompt}"},{"type": "image_url","image_url": {"url": f"{img_base64}"}}]}]}
             data_img = json.dumps(data_img)
 
             response = requests.post(url=url, headers=header_img, data=data_img)
