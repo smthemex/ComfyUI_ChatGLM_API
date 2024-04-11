@@ -61,6 +61,7 @@ class ZhipuaiApi_Txt:
                 "temperature": ("FLOAT", {"default": 0.95, "min": 0.01, "max": 0.99, "step": 0.01, "round": False, "display": "slider"}),
                 "output_language": (["English", "Original_language"],),
             },
+            "optional": {"prompt_tran2english_only": ("BOOLEAN", {"default": False},), }
         }
 
     RETURN_TYPES = ("STRING",)  
@@ -69,16 +70,19 @@ class ZhipuaiApi_Txt:
     CATEGORY = "ChatGlm_Api"  
 
 
-    def zhipuai_txt_api(self, prompt, model_name, max_tokens, temperature, output_language):
+    def zhipuai_txt_api(self, prompt, model_name, max_tokens, temperature, output_language, prompt_tran2english_only):
         if not self.api_key:
             raise ValueError("API key is required")
         if prompt == None:
             raise ValueError("need prompt")
         else:
-            if output_language == "English":
-                prompt_txt = 'Reply in English'
+            if prompt_tran2english_only:
+                prompt_txt = '以上内容翻译为成英文'
             else:
-                prompt_txt = '用提问的语言回复我'
+                if output_language == "English":
+                    prompt_txt = 'Answer my questions or requests in English'
+                else:
+                    prompt_txt = '用我使用的语言来回答我的问题或要求'
             prompt = ''.join([prompt, prompt_txt])
             url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
             exp_seconds = int(9)
@@ -138,9 +142,9 @@ class ZhipuaiApi_Img:
             raise ValueError("Needs img")
         else:
             if output_language == "English":
-                prompt_img = 'Reply in English'
+                prompt_img = 'Answer my questions or requests in English'
             else:
-                prompt_img = '用提问的语言回复我'
+                prompt_img = '用我使用的语言来回答我的问题或要求'
             prompt = ''.join([prompt, prompt_img])
 
             url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
