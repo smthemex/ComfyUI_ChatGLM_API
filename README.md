@@ -31,6 +31,8 @@ GLM-3-Turbo：  0.005元 / 千tokens， 推荐用GLM-3-Turbo，主打便宜
 2、加入了max_tokens和temperature参数，max_tokens可以控制输出文本的数量，temperature参数越大，随机性越强，越小，准确度越高  
 Added max_tokens and temperature parameters, which can control the quantity of output text. The larger the temperature parameter, the stronger the randomness, and the smaller the accuracy  
 
+3、加入翻译为英文选项，开启时仅翻译为提示词英文，此时对话模式下 English和origin_language不起作用。  
+
 **D 示例：**    
 
 1、txt2txt节点一: 文本翻译,故事描述等...   
@@ -38,7 +40,7 @@ Added max_tokens and temperature parameters, which can control the quantity of o
 可选ChATGLM-4，GLM-3-Turbo模型，prompt你可以直接输入中文或任何其他文字，让然GLM4帮你写提示词，中国大陆用户方便点，外网用好像也可以，比较麻烦而已。    
 max_tokens控制输出文本的数量； 
 temperature控制随机性；  
-language控制输出的语言类别，origin为初始输入语言  
+language控制对话输出的语言类别，选择origin时，对话输出结果为初始输入语言，无法作为prompt使用。   
 
 <span style="color:#333333"><img src="https://github.com/smthemex/ComfyUI_ChatGLM_API/blob/main/workflow/txt2txt2.png" width="50%"></span>
 
@@ -49,6 +51,16 @@ language控制输出的语言类别，origin为初始输入语言
 注意：图片载入前,最好使用"图片剪裁或缩放节点",减少图片编码为Base64数据后的长度,官方只接受小于5M的图片.      
   
 <span style="color:#333333"><img src="https://github.com/smthemex/ComfyUI_ChatGLM_API/blob/main/workflow/img2txt2.png" width="50%"></span>
+
+3、翻译节点开启，同一提示词不同输出示例    
+
+以下为仅翻译模式，输出prompt翻译结果：   
+
+<span style="color:#333333"><img src="https://github.com/smthemex/ComfyUI_ChatGLM_API/blob/main/workflow/trans_only_examples.png" width="50%"></span>
+
+以下为关闭翻译，chat模式，输出英文对话：    
+
+<span style="color:#333333"><img src="https://github.com/smthemex/ComfyUI_ChatGLM_API/blob/main/workflow/reply%20in%20english_examples.png" width="50%"></span>
 
 **E 其他:**    
 如果有空，会继续补全其他的模型。  
