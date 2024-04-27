@@ -33,6 +33,8 @@ Added max_tokens and temperature parameters, which can control the quantity of o
 
 3、加入翻译为英文选项，开启时仅翻译为提示词英文，此时对话模式下 English和origin_language不起作用。  
 
+4、加入角色模型和绘图模型的api接口，你可用选择跟你自定义的角色聊天或者文生图了。2024/04/27   
+
 **D 示例：**    
 
 1、txt2txt节点一: 文本翻译,故事描述等...   
@@ -60,10 +62,14 @@ language控制对话输出的语言类别，选择origin时，对话输出结果
 
 以下为关闭翻译，chat模式，输出英文对话：    
 
-<span style="color:#333333"><img src="https://github.com/smthemex/ComfyUI_ChatGLM_API/blob/main/workflow/reply%20in%20english_examples.png" width="50%"></span>
+<span style="color:#333333"><img src="https://github.com/smthemex/ComfyUI_ChatGLM_API/blob/main/workflow/reply%20in%20english_examples.png" width="50%"></span>   
+
+4、拟人模型节点示例：   
+<span style="color:#333333"><img src="https://github.com/smthemex/ComfyUI_ChatGLM_API/blob/main/workflow/Character_examples.png" width="50%"></span>   
+
 
 **E 其他:**    
-如果有空，会继续补全其他的模型。  
+看官方的支持进度，不知道能否加入智能体。  
 
 智谱其实做了ChatGLM_API接口的SDK https://github.com/zhipuai/zhipuai-sdk-python  ，有兴趣可以去尝试。    
 迁移到ComfyUI时，我发现SDK在ComfyUI的节点里好像不大管用，所以这个节点未使用智谱的SDK，而是用常规的HTTP调用API接口。    
