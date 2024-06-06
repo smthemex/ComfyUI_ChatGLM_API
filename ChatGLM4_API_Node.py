@@ -1,4 +1,6 @@
 import os
+import re
+import sys
 import json
 import requests
 import time
@@ -10,10 +12,72 @@ import base64
 import cv2
 from io import BytesIO
 import numpy as np
+import folder_paths
 import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+dir_path = os.path.dirname(os.path.abspath(__file__))
+path_dir = os.path.dirname(dir_path)
+file_path = os.path.dirname(path_dir)
+
+paths = []
+for search_path in folder_paths.get_folder_paths("diffusers"):
+    if os.path.exists(search_path):
+        for root, subdir, files in os.walk(search_path, followlinks=True):
+            if "model.safetensors.index.json" in files:
+                paths.append(os.path.relpath(root, start=search_path))
+
+if paths != []:
+    paths = ["none"] + [x for x in paths if x]
+else:
+    paths = ["none", ]
 
 p = os.path.dirname(os.path.realpath(__file__))
 
+def get_local_path(file_path, model_path):
+    path = os.path.join(file_path, "models", "diffusers", model_path)
+    model_path = os.path.normpath(path)
+    if sys.platform=='win32':
+        model_path = model_path.replace('\\', "/")
+    return model_path
+def get_instance_path(path):
+    instance_path = os.path.normpath(path)
+    if sys.platform == 'win32':
+        instance_path = instance_path.replace('\\', "/")
+    return instance_path
+def tensor_to_image(tensor):
+    #tensor = tensor.cpu()
+    image_np = tensor.squeeze().mul(255).clamp(0, 255).byte().numpy()
+    image = Image.fromarray(image_np, mode='RGB')
+    return image
+
+def string_punctuation_bool(string_in):
+    pattern = r"[^\w\s]$"
+    string_bool = bool(re.search(pattern, string_in))
+    return string_bool
+
+def trans_reply(reply_language,user_content):
+    if string_punctuation_bool(user_content):
+        join_punctuation = " "
+    else:
+        join_punctuation = ","
+    if reply_language == "chinese":
+        user_content = f"{join_punctuation}".join([user_content, "用中文回复我"])
+    elif reply_language == "russian":
+        user_content = f"{join_punctuation}".join([user_content, "Ответь мне по - русски"])
+    elif reply_language == "german":
+        user_content = f"{join_punctuation}".join([user_content, "Antworte mir auf Deutsch"])
+    elif reply_language == "french":
+        user_content = f"{join_punctuation}".join([user_content, "Répondez - moi en français"])
+    elif reply_language == "spanish":
+        user_content = f"{join_punctuation}".join([user_content, "Contáctame en español"])
+    elif reply_language == "japanese":
+        user_content = f"{join_punctuation}".join([user_content, "日本語で返事して"])
+    elif reply_language == "english":
+        user_content = f"{join_punctuation}".join([user_content, "answer me in English"])
+    else:
+        user_content = f"{join_punctuation}".join([user_content, "Reply to me in the language of my question mentioned above"])
+    return user_content
 
 def get_zpai_api_key():
     try:
@@ -154,11 +218,6 @@ class ZhipuaiApi_Img:
     FUNCTION = "zhipuai_img2txt_api"
     CATEGORY = "ChatGlm_Api"
 
-    def tensor_to_image(self, tensor):
-        tensor = tensor.cpu()
-        image_np = tensor.squeeze().mul(255).clamp(0, 255).byte().numpy()
-        image = Image.fromarray(image_np, mode='RGB')
-        return image
 
     def zhipuai_img2txt_api(self, prompt, image, max_tokens, temperature, output_language):
         if not self.api_key:
@@ -182,7 +241,7 @@ class ZhipuaiApi_Img:
 
             token = generate_token(apikey_s=client_key, exp_second=exp_seconds)
 
-            pil_image = self.tensor_to_image(image)
+            pil_image = tensor_to_image(image)
 
             temp_directory = tempfile.gettempdir()
             unique_suffix = "_temp_" + ''.join(random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(5))
@@ -266,14 +325,145 @@ class ZhipuaiApi_Character:
         return (assistant_char,)
 
 
+class Glm_4_9b_Chat:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "repo_id": ("STRING", {"forceInput": True}),
+                "max_length": ("INT", {"default": 2500, "min": 100, "max": 10000, "step": 1, "display": "number"}),
+                "top_k": ("INT", {"default": 1, "min": 1, "max": 100, "step": 1, "display": "number"}),
+                "user_content": ("STRING", {"multiline": True, "default": "你好！"}),
+                "reply_language": (["english", "chinese", "russian", "german", "french", "spanish", "japanese","Original_language"],),
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("prompt",)
+    FUNCTION = "glm_4_9b_chat"
+    CATEGORY = "ChatGlm_Api"
+
+    def glm_4_9b_chat(self, repo_id, max_length, top_k, user_content,reply_language):
+        user_content = trans_reply(reply_language, user_content)
+        device = "cuda"
+        tokenizer = AutoTokenizer.from_pretrained(repo_id, trust_remote_code=True)
+        inputs = tokenizer.apply_chat_template([{"role": "user", "content": user_content}],
+                                               add_generation_prompt=True,
+                                               tokenize=True,
+                                               return_tensors="pt",
+                                               return_dict=True
+                                               )
+
+        inputs = inputs.to(device)
+        model = AutoModelForCausalLM.from_pretrained(
+            repo_id,
+            torch_dtype=torch.bfloat16,
+            low_cpu_mem_usage=True,
+            trust_remote_code=True
+        ).to(device).eval()
+
+        gen_kwargs = {"max_length": max_length, "do_sample": True, "top_k": top_k}
+        with torch.no_grad():
+            outputs = model.generate(**inputs, **gen_kwargs)
+            outputs = outputs[:, inputs['input_ids'].shape[1]:]
+            outputs =tokenizer.decode(outputs[0], skip_special_tokens=True)
+            #print(outputs, type(outputs))
+            outputs = outputs.strip()
+            return (outputs,)
+
+class Glm_4v_9b:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "repo_id": ("STRING", {"forceInput": True}),
+                "image": ("IMAGE",),
+                "max_length": ("INT", {"default": 2500, "min": 100, "max": 10000, "step": 1, "display": "number"}),
+                "top_k": ("INT", {"default": 1, "min": 1, "max": 100, "step": 1, "display": "number"}),
+                "reply_language": (["english", "chinese", "russian", "german", "french", "spanish", "japanese","Original_language"],),
+                "user_content": ("STRING", {"multiline": True, "default": "描述这张图片"})
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("prompt",)
+    FUNCTION = "glm_4_9b"
+    CATEGORY = "ChatGlm_Api"
+
+    def glm_4_9b(self, repo_id,image, max_length, top_k,reply_language,user_content):
+        user_content = trans_reply(reply_language, user_content)
+        device = "cuda"
+        tokenizer = AutoTokenizer.from_pretrained(repo_id, trust_remote_code=True)
+        image = tensor_to_image(image)
+        inputs = tokenizer.apply_chat_template([{"role": "user", "image": image, "content": user_content}],
+                                               add_generation_prompt=True, tokenize=True, return_tensors="pt",
+                                               return_dict=True)  # chat mode
+
+        inputs = inputs.to(device)
+        model = AutoModelForCausalLM.from_pretrained(
+            repo_id,
+            torch_dtype=torch.bfloat16,
+            low_cpu_mem_usage=True,
+            trust_remote_code=True
+        ).to(device).eval()
+
+        gen_kwargs = {"max_length": max_length, "do_sample": True, "top_k": top_k}
+        with torch.no_grad():
+            outputs = model.generate(**inputs, **gen_kwargs)
+            outputs = outputs[:, inputs['input_ids'].shape[1]:]
+            #print(tokenizer.decode(outputs[0]))
+            outputs = outputs.strip()
+            return (outputs,)
+
+
+class Glm_Lcoal_Or_Repo:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "local_model_path": (paths,),
+                "repo_id": (["none","THUDM/glm-4-9b-chat", "THUDM/glm-4v-9b","THUDM/glm-4-9b","THUDM/glm-4-9b-chat-1m"],)
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("repo_id",)
+    FUNCTION = "repo_choice"
+    CATEGORY = "ChatGlm_Api"
+
+    def repo_choice(self, local_model_path, repo_id):
+        if repo_id == "none":
+            if local_model_path == "none":
+                raise "you need choice repo_id or download model in diffusers directory "
+            elif local_model_path != "none":
+                model_path = get_local_path(file_path, local_model_path)
+                repo_id = get_instance_path(model_path)
+        return (repo_id,)
+
+
 NODE_CLASS_MAPPINGS = {
     "ZhipuaiApi_Txt": ZhipuaiApi_Txt,
     "ZhipuaiApi_img": ZhipuaiApi_Img,
-    "ZhipuaiApi_Character": ZhipuaiApi_Character
+    "ZhipuaiApi_Character": ZhipuaiApi_Character,
+    "Glm_4_9b_Chat":Glm_4_9b_Chat,
+    "Glm_4v_9b":Glm_4v_9b,
+    "Glm_Lcoal_Or_Repo":Glm_Lcoal_Or_Repo
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "ZhipuaiApi_Txt": "ZhipuaiApi_Txt",
     "ZhipuaiApi_Img": "ZhipuaiApi_Img",
-    "ZhipuaiApi_Character": "ZhipuaiApi_Character"
+    "ZhipuaiApi_Character": "ZhipuaiApi_Character",
+    "Glm_4_9b_Chat":"Glm_4_9b_Chat",
+    "Glm_4v_9b":"Glm_4v_9b",
+    "Glm_Lcoal_Or_Repo":"Glm_Lcoal_Or_Repo"
 }
