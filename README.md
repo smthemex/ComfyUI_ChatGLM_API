@@ -3,6 +3,17 @@
 **注意:**  
 这是可以在ComfyUI里调用Chatglm4、3等模型的API插件，用来翻译、描述图片等等，类似OpenAI API 或Claude API。如果你只想调用Api查询资料或者娱乐,可选Original_language,作为你的母语输出. 限于中国的法律法规,所有NSFW内容可能会被过滤掉,如果违规上传NSFW的内容,你的zhipuai账户可能因此被封禁. 
 
+
+Update   
+----
+2024-06-06  
+
+--加入了最新的"THUDM/glm-4-9b-chat","THUDM/glm-4v-9b"开源模型的支持    
+--因为需要使用transformers最新的AutoModelForCausalLM模块,所以transformers版本需要更新到最新,如果你只是想用api,最好不要更新.    
+
+--Added support for the latest "THUDM/glm-4-9b chat" and "THUDM/glm-4v-9b" open-source models   
+--Because you need to use the latest AutoModelForCausalLM module from Transformers, the Transformers version needs to be updated to the latest version. If you only want to use the API, it is best not to update it   
+
 **Note:**   
 This is an API plugin that can be used in ComfyUI to call models such as Chatglm4 and 3 for translating, describing images, and more, similar to OpenAI API or Claude API. If you only want to call Api to search for information or entertainment, you can choose Original_language as your native language output Due to Chinese laws and regulations, all NSFW content may be filtered out. If you upload NSFW content in violation of regulations, your Zhipuai account may be banned as a result
 
