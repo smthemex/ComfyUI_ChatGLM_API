@@ -126,9 +126,8 @@ class ZhipuaiApi_Txt:
                 "max_tokens": ("INT", {"default": 1024, "min": 128, "max": 8192, "step": 128, "display": "slider"}),
                 "temperature": ("FLOAT", {"default": 0.95, "min": 0.01, "max": 0.99, "step": 0.01, "round": False,
                                           "display": "slider"}),
-                "output_language": (["English", "Original_language"],),
-            },
-            "optional": {"prompt_tran2english_only": ("BOOLEAN", {"default": False},), }
+                "output_language": (["english", "original_language"],),
+                "translate_to": (["none","english", "chinese","russian", "japanese"],)}
         }
 
     RETURN_TYPES = ("STRING", "IMAGE")
@@ -137,7 +136,7 @@ class ZhipuaiApi_Txt:
     CATEGORY = "ChatGlm_Api"
 
     def zhipuai_txt_api(self, prompt, model_name, max_tokens, temperature,output_language,
-                        prompt_tran2english_only):
+                        translate_to):
         if not self.api_key:
             raise ValueError("API key is required")
         if prompt == None:
@@ -165,13 +164,19 @@ class ZhipuaiApi_Txt:
                 image = torch.from_numpy(np.array(image).astype(np.float32) / 255.0).unsqueeze(0)
                 return (url, image)
             else:
-                if prompt_tran2english_only:
-                    prompt_txt = '翻译以下内容为英文'
-                else:
-                    if output_language == "English":
+                if translate_to=="none":
+                    if output_language == "english":
                         prompt_txt = 'Only respond to the results of the following questions in English'
                     else:
                         prompt_txt = '只回复以下问题的结果，用我使用的语言'
+                elif translate_to=="english":
+                    prompt_txt = '翻译以下内容为英文,仅回复翻译后的内容结果'
+                elif translate_to=="chinese":
+                    prompt_txt = '翻译以下内容为中文，仅回复翻译后的内容结果'
+                elif translate_to == "russian":
+                    prompt_txt = '翻译以下内容为俄文，仅回复翻译后的内容结果'
+                else:
+                    prompt_txt = '翻译以下内容为日文，仅回复翻译后的内容结果'
                 prompt = ':'.join([prompt_txt, prompt])
                 url = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
                 exp_seconds = int(9)
