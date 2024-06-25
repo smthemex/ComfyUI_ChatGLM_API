@@ -1,0 +1,15 @@
+[project]
+name = "comfyui_chatglm_api"
+description = "you can using chatglm in comfyUI"
+version = "1.0.0"
+license = "LICENSE"
+dependencies = ["requests", "transformers==4.41.1"]
+
+[project.urls]
+Repository = "https://github.com/smthemex/ComfyUI_ChatGLM_API"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "smthemx"
+DisplayName = "ComfyUI_ChatGLM_API"
+Icon = ""
