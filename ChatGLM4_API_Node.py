@@ -245,19 +245,13 @@ class ZhipuaiApi_Img:
             client_key = str(get_zpai_api_key())
 
             token = generate_token(apikey_s=client_key, exp_second=exp_seconds)
-
+            
+            #tensor2pil
             pil_image = tensor_to_image(image)
-
-            temp_directory = tempfile.gettempdir()
-            unique_suffix = "_temp_" + ''.join(random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(5))
-            filename = f"image{unique_suffix}.png"
-            img_path = os.path.join(temp_directory, filename)
-
-            pil_image.save(img_path)
-
+            img=np.array(pil_image)
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             # img to base64
-            img = cv2.imread(img_path)
-            img_data = cv2.imencode('test.PNG', img)[1].tobytes()
+            img_data = cv2.imencode('.png', img)[1].tobytes()
             base64_data = base64.b64encode(img_data)
             img_base64 = str(base64_data, encoding='utf-8')
 
@@ -273,11 +267,11 @@ class ZhipuaiApi_Img:
             response = requests.post(url=url, headers=header_img, data=data_img)
             img_content = response.json()
             content_img = img_content["choices"][0]["message"]["content"]
-            # print(content_img)
             # content_img = str(content_img).strip('"')
             prompt = content_img.replace("\n", "")
-            os.remove(img_path)
             return (prompt,)
+
+
 class ZhipuaiApi_Character:
 
     def __init__(self):
